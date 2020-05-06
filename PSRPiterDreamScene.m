@@ -18,6 +18,7 @@ NSString * const kPSRPlayerCollisionGroupName = @"PSRPlayerCollisionGroupName";
 NSString * const kPSRDonutCollisionGroupName  = @"PSRDonutCollisionGroupName";
 NSString * const kPSRPlayerCollisionType      = @"psr_player";
 NSString * const kPSRDonutPointCollisionType  = @"psr_donut";
+NSString * const kPSRDonutPointMeteor         = @"psr_meteor";
 
 @interface PSRPiterDreamScene() {
 
@@ -75,8 +76,8 @@ NSString * const kPSRDonutPointCollisionType  = @"psr_donut";
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [self addTubes:1.5];
     });
-    [[OALSimpleAudio sharedInstance] playBg:@"DJ_Sona.mp3"
-                                     volume:0.2
+    [[OALSimpleAudio sharedInstance] playBg:@"intro.mp3"
+                                     volume:1
                                         pan:0
                                        loop:1];
     [self schedule:@selector(addMonster:) interval:1.5];
@@ -166,7 +167,7 @@ NSString * const kPSRDonutPointCollisionType  = @"psr_donut";
 #pragma mark - dynamic object
 - (void)addMonster:(CCTime)dt {
     
-    CCSprite *monster = [CCSprite spriteWithImageNamed:@"meteor.png"];
+    CCSprite *monster = [CCSprite spriteWithImageNamed:@"star.png"];
     
     // 1
     int minY = monster.contentSize.height / 2;
@@ -177,8 +178,8 @@ NSString * const kPSRDonutPointCollisionType  = @"psr_donut";
     // 2
     monster.position = CGPointMake(self.contentSize.width + monster.contentSize.width/2, randomY);
    monster.physicsBody = [CCPhysicsBody bodyWithRect:(CGRect){CGPointZero, monster.contentSize} cornerRadius:0];
-    monster.physicsBody.collisionGroup = @"monsterGroup";
-    monster.physicsBody.collisionType  = @"monsterCollision";
+    monster.physicsBody.collisionGroup = @"itemGroup";
+    monster.physicsBody.collisionType  = @"itemCollision";
     [_physicalWorld addChild:monster];
     
     // 3
@@ -470,6 +471,24 @@ NSString * const kPSRDonutPointCollisionType  = @"psr_donut";
     });
     return NO;
 }
+- (BOOL)ccPhysicsCollisionBegin:(CCPhysicsCollisionPair *)pair psr_player:(CCNode *)player itemCollision:(CCNode *)monster
+{
+    [monster runAction:[CCActionFadeOut actionWithDuration:0.1]];
+    monster.physicsBody.sensor = YES;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        _player.physicsBody.mass  -= 0.01;
+        [self p_updateMassLabel];
+        _player.scale = 1 * sqrt(sqrt(_player.physicsBody.mass));
+        monster.physicsBody.velocity = CGPointZero;
+        monster.physicsBody.force    = CGPointZero;
+        [monster runAction:[CCActionPlace actionWithPosition:ccp(-monster.contentSize.width * 2, 0)]];
+        [monster runAction:[CCActionFadeIn actionWithDuration:0]];
+    });
+    return NO;
+}
+
+
+
 
 
 #pragma mark - Setup
@@ -501,11 +520,23 @@ NSString * const kPSRDonutPointCollisionType  = @"psr_donut";
     _bottomBackground2.position    = ccp(_bottomBackground2.contentSize.width, 0);
     [self addChild:_bottomBackground2];
 }
-- (BOOL)ccPhysicsCollisionBegin:(CCPhysicsCollisionPair *)pair monsterCollision:(CCNode *)monster projectileCollision:(CCNode *)projectile {
+- (BOOL)ccPhysicsCollisionBegin:(CCPhysicsCollisionPair *)pair monsterCollision:(CCNode *)monster projectileCollision:(CCNode *)projectile
+    {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+           _player.physicsBody.mass  -= 0.01;
+           [self p_updateMassLabel];
+            self.score ++;
+           _player.scale = 1 * sqrt(sqrt(_player.physicsBody.mass));
+           monster.physicsBody.velocity = CGPointZero;
+           monster.physicsBody.force    = CGPointZero;
+           [monster runAction:[CCActionPlace actionWithPosition:ccp(-monster.contentSize.width * 2, 0)]];
+           [monster runAction:[CCActionFadeIn actionWithDuration:0]];
+       });
     [monster removeFromParent];
     [projectile removeFromParent];
     return YES;
 }
+
 
 -(void) touchBegan:(UITouch *)touch withEvent:(UIEvent *)event
 {
@@ -534,6 +565,7 @@ NSString * const kPSRDonutPointCollisionType  = @"psr_donut";
         CCActionMoveTo *actionMove   = [CCActionMoveTo actionWithDuration:1.5f position:targetPosition];
         CCActionRemove *actionRemove = [CCActionRemove action];
         [projectile runAction:[CCActionSequence actionWithArray:@[actionMove,actionRemove]]];
+    
     
     // -----------------------------------------------------------------------
 #pragma mark - Touch Handler

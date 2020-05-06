@@ -33,7 +33,7 @@
 
 - (void)setScores:(NSArray *)scores
 {
-    _scores = [scores sortedArrayUsingSelector:@selector(intValue)];
+    _scores = [scores sortedArrayUsingSelector:@selector(compare:)];
     [[NSUserDefaults standardUserDefaults]setValue:_scores
                                             forKey:PSRScoresKey];
 }
@@ -43,12 +43,12 @@
     return [[self alloc]initWithScore: score];
 }
 
-- (HighScoreScene *)initWithScore:(float)score
+- (HighScoreScene *)initWithScore:(int )score
 {
     self = [super init];
     if (self){
         if (score != 0){
-            self.scores = [self.scores arrayByAddingObject:[NSString stringWithFormat:@"%f %@",score,[NSDateFormatter localizedStringFromDate:[NSDate date]
+            self.scores = [self.scores arrayByAddingObject:[NSString stringWithFormat:@"%d %@",score,[NSDateFormatter localizedStringFromDate:[NSDate date]
                                                                                                                                     dateStyle:NSDateFormatterShortStyle
                                                                                                                                     timeStyle:NSDateFormatterShortStyle]]];
         }

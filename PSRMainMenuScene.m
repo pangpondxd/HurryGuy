@@ -5,11 +5,14 @@
 //  Created by Tanawat Wirattangsakul
 //
 
+
 #import "PSRMainMenuScene.h"
 #import "cocos2d.h"
 #import "cocos2d-ui.h"
 #import "CCDirector.h"
 #import "PSRPiterDreamScene.h"
+#import "PSRStoryScene.h"
+#import "PSRStoryScene2.h"
 
 @implementation PSRMainMenuScene
 
@@ -21,14 +24,15 @@
     CCNodeColor * backgroundColor = [CCNodeColor nodeWithColor:[CCColor whiteColor]];
     [self addChild:backgroundColor];
     
-    CCSprite *backgroundImage = [CCSprite spriteWithImageNamed:@"menu@2x.jpg"];
-    [backgroundImage setTextureRect:CGRectMake(0, 0, 640, 580)];
+ 
+    CCSprite *backgroundImage = [CCSprite spriteWithImageNamed:@"background_menu.png"];
+    [backgroundImage setTextureRect:CGRectMake(0, 0, 320, 580)];
     backgroundImage.anchorPoint = CGPointZero;
     backgroundImage.position    = CGPointZero;
     [self addChild:backgroundImage];
     
     // Hello world
-    CCLabelTTF *label = [CCLabelTTF labelWithString:@"Shooting 2D"
+    CCLabelTTF *label = [CCLabelTTF labelWithString:@"Harry Guy"
                                            fontName:@"Chalkduster"
                                            fontSize:36.0f];
     label.positionType = CCPositionTypeNormalized;
@@ -52,7 +56,7 @@
     
     [self addChild:helloWorldButton];
     
-    CCButton *aboutButton = [CCButton buttonWithTitle:@"[ About ]"
+    CCButton *aboutButton = [CCButton buttonWithTitle:@"[ Story ]"
                                              fontName:@"Chalkduster"
                                              fontSize:18.0f];
     
@@ -62,11 +66,11 @@
     aboutButton.positionType = CCPositionTypeNormalized;
     aboutButton.position     = ccp(0.5f, 0.2f);
     
-    //bug
-    /*
+
+    
     [aboutButton setTarget:self
-                      selector:@selector(onAboutClicked:)];
-    */
+                      selector:@selector(onStoryClicked:)];
+    
     [self addChild:aboutButton];
     
     CCButton *hightScoreButton = [CCButton buttonWithTitle:@"[ HighScore ]"
@@ -91,10 +95,10 @@
 - (void)onEnter
 {
     [super onEnter];
-    [[OALSimpleAudio sharedInstance] playBg:@"noctis.mp3"
+    [[OALSimpleAudio sharedInstance] playBg:@"intro1.mp3"
                                      volume:1
                                         pan:0
-                                       loop:0];
+                                       loop:1];
 }
 
 // -----------------------------------------------------------------------
@@ -104,7 +108,14 @@
 {
     [[CCDirector sharedDirector]pushScene:[PSRPiterDreamScene new]
                            withTransition:[CCTransition transitionRevealWithDirection:CCTransitionDirectionRight
-                                                                             duration:1.0]];
+                                                                             duration:0.5]];
 }
+- (void)onStoryClicked:(CCButton *)aButton
+{
+    [[CCDirector sharedDirector]pushScene:[PSRStoryScene new]
+                           withTransition:[CCTransition transitionRevealWithDirection:CCTransitionDirectionRight
+                                                                             duration:0.5]];
+}
+
 
 @end
